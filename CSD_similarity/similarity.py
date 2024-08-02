@@ -23,7 +23,6 @@ def hsr_fingerprint(molecule):
     # Centering data
     molecule_array = molecule_array - np.mean(molecule_array, axis=0)
     molecule_array_1 = molecule_array_1 - np.mean(molecule_array_1, axis=0)
-    # print(np.array(molecule_array))
     return fp.generate_fingerprint_from_data(np.array(molecule_array)), fp.generate_fingerprint_from_data(np.array(molecule_array_1))
 
 
@@ -65,7 +64,6 @@ def init_process(target_fp_3d, target_fp_4d, fingerprint_dict_3d, fingerprint_di
     fp_dict_3d = fingerprint_dict_3d
     fp_dict_4d = fingerprint_dict_4d
     
-
 if __name__ == '__main__':
     start = time.time()
     csd_reader = io.EntryReader('CSD')
@@ -75,21 +73,16 @@ if __name__ == '__main__':
     target_fp_3d_1, target_fp_4d_1 = hsr_fingerprint(target_molecule_1)
     
     # OLEFIN METATHESIS TARGET
-    mol_reader = io.MoleculeReader('../targets/grubbs:olef_met/hb7792sup1.cif')
-    target_molecule_2 = mol_reader[0]
+    target_molecule_2 = csd_reader.entry('TITTUO').molecule
     target_fp_3d_2, target_fp_4d_2 = hsr_fingerprint(target_molecule_2)
     
     # PNP LIGAND TARGET
-    # mol_reader = io.MoleculeReader('targets/PNP_type/ScienceDirect_files_19Jul2024_13-16-49.811/Complex_2.final.cif')
-    print(os.getcwd())  
-    mol_reader = io.MoleculeReader('../targets/PNP_type/ScienceDirect_files_19Jul2024_13-16-49.811/Complex 3.cif')
-    target_molecule_3 = mol_reader[0].components[0]
+    target_molecule_3 = csd_reader.entry('NIVHEJ').molecule
     target_fp_3d_3, target_fp_4d_3 = hsr_fingerprint(target_molecule_3)
     
     # # SALEN TYPE TARGET
     target_molecule_4 = csd_reader.entry('XIDTOW').molecule
     target_fp_3d_4, target_fp_4d_4 = hsr_fingerprint(target_molecule_4)
-    
     
     target_molecules = [target_molecule_1, target_molecule_2, target_molecule_3, target_molecule_4]
     target_fps_3d = [target_fp_3d_1, target_fp_3d_2, target_fp_3d_3, target_fp_3d_4]
@@ -110,13 +103,13 @@ if __name__ == '__main__':
             results = pool.map(calculate_similarity, entries)
         print(f'Finished calculating similarity for {len(results)} entries')
         
-        # get results for 3D and 4D fingerprints in separate lists
-        results_3d = [(result[0], max(result[1]) if result[1] else 0) for result in results]
-        results_4d = [(result[0], max(result[2]) if result[2] else 0) for result in results]
-        
-        # sort results by similarity score
-        results_3d = sorted(results_3d, key=lambda x: x[1], reverse=True)
-        results_4d = sorted(results_4d, key=lambda x: x[1], reverse=True)
+        # Get results for 3D and 4D fingerprints in separate lists
+        results_3d = [(result[0], result[1]) for result in results]
+        results_4d = [(result[0], result[2]) for result in results]
+
+        # Sort results by the maximum similarity score in descending order
+        results_3d = sorted(results_3d, key=lambda x: max(x[1]) if x[1] else 0, reverse=True)
+        results_4d = sorted(results_4d, key=lambda x: max(x[1]) if x[1] else 0, reverse=True)
         
         # Save the results in the two files
         print(f'Saving 3d results to {result_file_3d}...')

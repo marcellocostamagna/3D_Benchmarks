@@ -23,6 +23,7 @@
 # 11. Connectivity (Complete/Partial/None)
 # 12. Metal Bonds
 # 13. Overlapping Atoms (Second check of disordered atoms)
+# 14. Has Disorder (True/False)
 
 import csv
 from ccdc import io
@@ -129,8 +130,8 @@ def filter_and_analyse(entry_id):
         return None
     
     # 4. Do not contain disordered atoms
-    if crystal.has_disorder:
-        return None
+    # if crystal.has_disorder:
+    #     return None
     
     # Analysis (operates on each molecule that passes the filtering)
     
@@ -167,7 +168,12 @@ def filter_and_analyse(entry_id):
                             for atom1 in molecule.atoms 
                             for atom2 in molecule.atoms if atom1 != atom2)   
     
-    return id, metals, components, components_with_metals, polymolecular, polymetallic, organometallic, explicit_hydrogens, hapticity, n_atoms, connectivity, metal_bonds, overlapping_atoms
+    # 14. Has Disorder (True/False)
+    disorder = False
+    if crystal.has_disorder:
+        disorder = True
+    
+    return id, metals, components, components_with_metals, polymolecular, polymetallic, organometallic, explicit_hydrogens, hapticity, n_atoms, connectivity, metal_bonds, overlapping_atoms, disorder
           
 def filtering_and_analysis(csd_reader):   
     entries = []
@@ -204,7 +210,8 @@ def saving(results):
                          'N_Atoms', 
                          'Connectivity', 
                          'Metal_Bonds', 
-                         'Overlapping Atoms'])
+                         'Overlapping Atoms',
+                         'Disorder'])
         for result in results:
             writer.writerow(result)
     
