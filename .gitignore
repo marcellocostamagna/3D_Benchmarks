@@ -1,3 +1,9 @@
 cif/
 .DS_Store
 .vscode/
+CSD_similarity/final_structures_with_fp.csv
+COD_similarity/final_structures_with_fp.csv
+CSD_similarity/entry_smiles_pybel.json
+CSD_similarity/final_structures_with_fp.csv.tar.gz
+COD_similarity/final_structures_with_fp.csv.tar.gz
+CSD_similarity/entry_smiles_pybel.json.tar.gz
