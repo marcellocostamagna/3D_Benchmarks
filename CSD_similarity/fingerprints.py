@@ -48,8 +48,10 @@ if __name__ == '__main__':
     start = time.time()
     print('Starting the fingerprint generation')
     # Load the dataframe
-    df = pd.read_csv('../molecule_libraries/CSD/final_structures.csv')
+    df = pd.read_csv('molecule_libraries/CSD/final_structures.csv')
     entries = df['Identifier'].tolist()
+    # For testing purposes get only the first 10 entries
+    # entries = entries[:10]
     print(f"Generating fingerprints for {len(entries)} entries with {cpu_count()} CPUs...")
     with Pool(processes=cpu_count()) as pool:
         results = pool.map(get_fingerprints, entries)  
@@ -65,6 +67,6 @@ if __name__ == '__main__':
     df['Fingerprint_4D'] = df['Identifier'].map(fingerprints_dict_1)
     print('Fingerprints added to the dataframe. Saving the dataframe to a CSV file...')
     # Save the dataframe to a CSV file
-    df.to_csv('final_structures_with_fp.csv', index=False)
+    df.to_csv('CSD_similarity/final_structures_with_fp.csv', index=False)
     print(f'Dataframe saved.\n Total time elapsed: {(time.time() - start)/60} minutes')
         
