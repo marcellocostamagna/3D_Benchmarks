@@ -108,3 +108,189 @@ def sigma_bonds_in_ring(metals, non_metals, num_intermediates):
     dative_bond = ccdc.search.QueryBond('Pi')
     query.add_bond(dative_bond , metal, hydrogen)
     return query
+
+# UNSATURATED RINGS
+def unsaturated_rings(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    unsat_bond = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom1.cyclic = True
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = True
+    query.add_bond(unsat_bond, atom1, atom2)
+    return query
+
+# UNSATURATED CONJUGATED RINGS
+def unsaturated_conjugated_rings(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    unsat_bond1 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    unsat_bond2 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom1.cyclic = True
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = True
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom3.cyclic = True
+    atom4 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom4.cyclic = True
+    
+    query.add_bond(unsat_bond1, atom1, atom2)
+    query.add_bond('Single', atom2, atom3)
+    query.add_bond(unsat_bond2, atom3, atom4)
+    return query
+
+# AROMATIC RINGS
+def aromatic_rings(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    aromatic_bond = ccdc.search.QueryBond('Aromatic')
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom1.cyclic = True
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = True
+    query.add_bond(aromatic_bond, atom1, atom2)
+    return query
+
+# CYCLIC MULTIHAPTO LIGANDS
+def cyclic_multihapto_ligands(metals, non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the metal atom
+    metal = query.add_atom(ccdc.search.QueryAtom(metals))
+    # Add the ligand atom
+    ligand = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    ligand.cyclic = True
+    # Add pi bond between the metal and the ligand
+    bond = ccdc.search.QueryBond('Pi')
+    query.add_bond(bond, metal, ligand)
+    return query
+
+# SATURATED RINGS
+def saturated_rings(non_metals, num_intermediates):
+    query = ccdc.search.QuerySubstructure()
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom1.cyclic = True
+    previous_atom = atom1
+    for _ in range(num_intermediates):
+        atom = query.add_atom(ccdc.search.QueryAtom(non_metals))
+        atom.cyclic = True
+        query.add_bond('Single', previous_atom, atom)
+        previous_atom = atom
+    # Close the ring 
+    query.add_bond('Single', previous_atom, atom1)
+    return query
+    
+# METAL IN CHAIN
+def metal_in_chains(metals, no_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the metal atom
+    metal = query.add_atom(ccdc.search.QueryAtom(metals))
+    # Add the ligand atom
+    ligand = query.add_atom(ccdc.search.QueryAtom(no_metals))
+    ligand.cyclic = False
+    # Add sigma bond between the metal and the ligand
+    bond = ccdc.search.QueryBond(['Single', 'Double', 'Triple', 'Quadruple', 'Delocalized'])
+    query.add_bond(bond, metal, ligand)
+    return query
+
+# LINEAR CHAINS
+def linear_chains(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = False
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom3.cyclic = False
+    bond1 = ccdc.search.QueryBond(['Single', 'Double', 'Triple', 'Quadruple'])
+    bond2 = ccdc.search.QueryBond(['Single', 'Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond1, atom1, atom2)
+    query.add_bond(bond2, atom2, atom3)
+    return query
+
+# UNSATURATED CHAINS
+def unsaturated_chains(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = False
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom3.cyclic = False
+    bond = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond, atom1, atom2)
+    query.add_bond('Any', atom2, atom3)
+    return query
+
+# UNSATURATED CONJUGATED CHAINS
+def unsaturated_conjugated_chains(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = False
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom3.cyclic = False
+    atom4 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom4.cyclic = False
+    bond1 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    bond3 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond1, atom1, atom2)
+    query.add_bond('Single', atom2, atom3)
+    query.add_bond(bond3, atom3, atom4)
+    return query
+
+# METAL ALLENES
+def metal_allenes(metals, non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the metal atom
+    metal = query.add_atom(ccdc.search.QueryAtom(metals))
+    # Add the ligand atom
+    atom1 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom('C'))
+    bond1 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    bond2 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond1, metal, atom1)
+    query.add_bond(bond2, atom1, atom2)
+    return query
+
+# ALLENES
+def allenes(non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the first atom
+    atom1= query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom('C'))
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    bond1 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    bond2 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond1, atom1, atom2)
+    query.add_bond(bond2, atom2, atom3)
+    return query
+
+# DATIVE CONJUGATED CHAINS
+def dative_in_conjugated_chains(metals, non_metals):
+    query = ccdc.search.QuerySubstructure()
+    # Add the metal atom
+    metal = query.add_atom(ccdc.search.QueryAtom(metals))
+    # Add the ligand atom
+    atom1 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom2.cyclic = False
+    atom3 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom3.cyclic = False
+    atom4 = query.add_atom(ccdc.search.QueryAtom(non_metals))
+    atom4.cyclic = False
+    bond1 = ccdc.search.QueryBond('Pi')
+    bond2 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    bond3 = ccdc.search.QueryBond('Single')
+    bond4 = ccdc.search.QueryBond(['Double', 'Triple', 'Quadruple'])
+    query.add_bond(bond1, metal, atom1)
+    query.add_bond(bond2, atom1, atom2)
+    query.add_bond(bond3, atom2, atom3)
+    query.add_bond(bond4, atom3, atom4)
+    return query
+        
+    
