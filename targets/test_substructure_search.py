@@ -5,9 +5,6 @@ import ccdc.io
 from pattern_queries import *
 from pattern_queries import METALS, NON_METALS
 
-
-
-
 def get_random_identifiers(number, space):
     csd_reader = ccdc.io.EntryReader('CSD')
     count = 0

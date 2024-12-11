@@ -6,11 +6,11 @@
 
 # PIPELINE:
 
-# 1. Definition of patterns of interest
+# 1. Definition of patterns of interest (Done)
 
 # 2. Targets, read from a file (only manual input)
 
-# 3. Viable molecules, read from a file
+# 3. Viable molecules, read from a file (Done)
 
 # 4. Initial population (potential) : filtering of viable molecules
 #    - Only molecules with a similarity to the targets below a cutoff are kept
