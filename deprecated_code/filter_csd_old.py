@@ -2,11 +2,10 @@
 #
 # Filtering: step to eliminate structures that do not meet these minimum criteria:
 #
-# 1. Have 3D coordinates
-# 2. Contain metals
-# 3. Are not polymeric
-# 4. Have explicit hydrogens
-# 5. Heavy component with SMILES
+# 1. Has 3D coordinates
+# 2. Are not polymeric
+# 3. Component of interest has more than 5 atoms
+# 4. Component of interest with SMILES
 #
 # Analysis: collects the structures that meet the above criteria and saves them in a
 # CSV file with the following information:
@@ -18,13 +17,14 @@
 # 5. Polymolecular (True/False) (these is deduced from the number of components)
 # 6. Polymetallic (True/False)
 # 7. Organometallic (True/False) (csd definition)
-# 8. Hapticity
-# 9. Number of atoms
-# 10. Connectivity (Complete/Partial/None)
-# 11. Metal Bonds
-# 12. Overlapping Atoms (Second check of disordered atoms)
-# 13. Has Disorder (True/False)
-# 14. SMILES of the heaviest component
+# 8. Explicicit Hydrogens (True/False) 
+# 9. Hapticity
+# 10. Number of atoms
+# 11. Connectivity (Complete/Partial/None)
+# 12. Metal Bonds
+# 13. Overlapping Atoms (Second check of disordered atoms)
+# 14. Has Disorder (True/False)
+# 15. SMILES of the component of interest
 
 import csv
 from ccdc import io
@@ -108,8 +108,53 @@ def check_connectivity(molecule):
         connectivity = 'None'
         
     return connectivity, metal_bonds
-        
 
+def component_of_interest(molecule):
+    """
+    Returns the component of interest: The component that checks at least two of the following criteria:
+    
+    1. Is organometallic
+    2. Is the heaviest component
+    3. Has the most atoms
+    
+    If the chosen component has fewer than 5 atoms, returns None.
+    """
+    components = molecule.components
+    
+    # Evaluate properties for each component
+    properties = []
+    for comp in components:
+        is_organometallic = comp.is_organometallic
+        molecular_weight = sum(atom.atomic_weight for atom in comp.atoms)
+        atom_count = len(comp.atoms)
+        
+        properties.append({
+            "component": comp,
+            "is_organometallic": is_organometallic,
+            "molecular_weight": molecular_weight,
+            "atom_count": atom_count
+        })
+    
+    # Determine heaviest component and component with most atoms
+    heaviest_component = max(properties, key=lambda x: x["molecular_weight"])
+    most_atoms_component = max(properties, key=lambda x: x["atom_count"])
+    
+    # Select the component that matches at least two criteria
+    for prop in properties:
+        criteria_met = 0
+        if prop["is_organometallic"]:
+            criteria_met += 1
+        if prop["component"] == heaviest_component["component"]:
+            criteria_met += 1
+        if prop["component"] == most_atoms_component["component"]:
+            criteria_met += 1
+        
+        if criteria_met >= 2:
+            # Check if the selected component has at least 5 atoms
+            if prop["atom_count"] >= 5:
+                return prop["component"]
+    return None
+        
 def filter_and_analyse(entry_id):
     reader = io.EntryReader('CSD')
     entry = reader.entry(entry_id)
@@ -122,70 +167,72 @@ def filter_and_analyse(entry_id):
     if not molecule.is_3d:
         return None
     
-    # 2. Contain metals
-    if not any(element in entry.formula for element in elements):
-        return None
-    
-    # 3. Are not polymeric
+    # 2. Are not polymeric
     if molecule.is_polymeric:
         return None
     
-    # 4. Have explicit hydrogens
-    explicit_hydrogens = any(atom.atomic_number == 1 for atom in molecule.atoms)
+    # 3. Has explicit hydrogens
+    explicit_hydrogens = all(atom.atomic_number == 1 and atom.coordinates is not None for atom in molecule.atoms if atom.atomic_number == 1)
     if not explicit_hydrogens:
         return None
     
-    # 5. Heavy component with SMILES
-    heavy_comp = molecule.heaviest_component
-    if not heavy_comp.smiles:
+    # 3. Component of interest has more than 5 atoms
+    comp_of_interest = component_of_interest(molecule)
+    if not comp_of_interest:
+        return 
+    
+    # 4. Component of interest has no overlapping atoms
+    desc = descriptors.MolecularDescriptors()
+    overlapping_atoms = any((d := desc.atom_distance(atom1, atom2)) is not None and d < 0.4
+                            for atom1 in comp_of_interest.atoms
+                            for atom2 in comp_of_interest.atoms if atom1 != atom2)
+    if overlapping_atoms:
+        return None
+    
+    # 4. Component of interest with SMILES
+    if not comp_of_interest.smiles:
         return None
     
     # Analysis (operates on each molecule that passes the filtering)
     
     # 1. Identifier
     id = entry.identifier
+
+    # 8. Explicicit Hydrogens (True/False)
+    explicit_hydrogens = all(atom.atomic_number == 1 and atom.coordinates is not None for atom in molecule.atoms if atom.atomic_number == 1)
+
+    # 10. Number of atoms of the component of interest
+    n_atoms = len(comp_of_interest.atoms)
+    # n_atoms = len(molecule.atoms)
     
-    # 2/3/4. Components and metals
-    metals, components, components_with_metals, polymetallic_flag = metals_and_components(molecule)
+    # 11/12. Connectivity (Complete/Partial/None) and Metal Bonds (True/False) 
+    # Only for the component of interest
+    connectivity, _ = check_connectivity(comp_of_interest)
+    # connectivity, _ = check_connectivity(molecule)
     
-    # 5. Polymolecular (True/False)
-    polymolecular = 'True' if components > 1 else 'False'
+    # 13. Overlapping Atoms (check of disordered atoms in the molecule)
+    # Only for the component of interest
+    # desc = descriptors.MolecularDescriptors()
+    # overlapping_atoms = any((d := desc.atom_distance(atom1, atom2)) is not None and d < 0.4
+    #                         for atom1 in comp_of_interest.atoms
+    #                         for atom2 in comp_of_interest.atoms if atom1 != atom2)
+    # overlapping_atoms = any((d := desc.atom_distance(atom1, atom2)) is not None and d < 0.4 
+    #                         for atom1 in molecule.atoms 
+    #                         for atom2 in molecule.atoms if atom1 != atom2)   
     
-    # 6. Polymetallic (True/False)
-    polymetallic = 'True' if polymetallic_flag else 'False'
-    
-    # 7. Organometallic (True/False)
-    organometallic = 'True' if molecule.is_organometallic else 'False'
-    
-    # 8. Hapticity (True if the molecule has at least a bond of type 9)
-    hapticity = any(bond.bond_type == 9 for bond in molecule.bonds)
-    
-    # 9. Number of atoms
-    n_atoms = len(molecule.atoms)
-    
-    # 10/11. Connectivity (Complete/Partial/None) and Metal Bonds (True/False)
-    connectivity, metal_bonds = check_connectivity(molecule)
-    
-    # 12. Overlapping Atoms (Second check of disordered atoms)
-    desc = descriptors.MolecularDescriptors()
-    overlapping_atoms = any((d := desc.atom_distance(atom1, atom2)) is not None and d < 0.4 
-                            for atom1 in molecule.atoms 
-                            for atom2 in molecule.atoms if atom1 != atom2)   
-    
-    # 13. Has Disorder (True/False)
+    # 14. Has Disorder (True/False) (check of disordered atoms in the crystal)
     disorder = False
     if crystal.has_disorder:
         disorder = True
         
-    # 14. SMILES of the heaviest component
-    smiles = heavy_comp.smiles
+    # 15. SMILES of the component of interest
+    smiles = comp_of_interest.smiles
     
-    
-    return id, metals, components, components_with_metals, polymolecular, polymetallic, organometallic, explicit_hydrogens, hapticity, n_atoms, connectivity, metal_bonds, overlapping_atoms, disorder, smiles
+    return id, explicit_hydrogens, n_atoms, connectivity, overlapping_atoms, disorder, smiles
           
 def filtering_and_analysis(csd_reader):   
     entries = []
-    stop = [False,1000] # Set a limit to the number of entries to process for testing
+    stop = [False,100000] # Set a limit to the number of entries to process for testing
     print("Retrieving entries from the CSD...")
     for entry in csd_reader.entries():
         entries.append(entry.identifier)
@@ -204,20 +251,12 @@ def filtering_and_analysis(csd_reader):
 
 def saving(results):
     # Saves the results to a CSV file
-    with open('final_structures_new.csv', 'w', newline='') as file:
+    with open('final_structures_last.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Identifier', 
-                         'Metals', 
-                         'Component Count', 
-                         'Components With Metals', 
-                         'Polymolecular', 
-                         'Polymetallic', 
-                         'Organometallic', 
                          'Explicit Hs', 
-                         'Hapticity', 
                          'N_Atoms', 
                          'Connectivity', 
-                         'Metal_Bonds', 
                          'Overlapping Atoms',
                          'Disorder',
                          'SMILES'])
@@ -229,7 +268,7 @@ def main():
     results = filtering_and_analysis(csd_reader)
     print(f"Filtering and analysis complete in {(time.time() - start)/60} minutes.")
     
-    print(f" Saving {len(results)} entries to 'final_structures_new.csv'...")
+    print(f" Saving {len(results)} entries to 'final_structures_last.csv'...")
     saving(results)
     print(f"Saving complete in {(time.time() - start)/60} minutes.")
     

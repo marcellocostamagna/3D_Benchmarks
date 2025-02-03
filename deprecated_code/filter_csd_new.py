@@ -2,11 +2,10 @@
 #
 # Filtering: step to eliminate structures that do not meet these minimum criteria:
 #
-# 1. Have 3D coordinates
-# 2. Contain metals
+# 1. Has 3D coordinates
+# 2. Contain metals #NOTE: removed since we'll introduce organic molecules in the benchmark
 # 3. Are not polymeric
-# 4. Have explicit hydrogens
-# 5. Heavy component with SMILES
+# 4. Heavy component with SMILES
 #
 # Analysis: collects the structures that meet the above criteria and saves them in a
 # CSV file with the following information:
@@ -18,13 +17,14 @@
 # 5. Polymolecular (True/False) (these is deduced from the number of components)
 # 6. Polymetallic (True/False)
 # 7. Organometallic (True/False) (csd definition)
-# 8. Hapticity
-# 9. Number of atoms
-# 10. Connectivity (Complete/Partial/None)
-# 11. Metal Bonds
-# 12. Overlapping Atoms (Second check of disordered atoms)
-# 13. Has Disorder (True/False)
-# 14. SMILES of the heaviest component
+# 8. Explicicit Hydrogens (True/False) 
+# 9. Hapticity
+# 10. Number of atoms
+# 11. Connectivity (Complete/Partial/None)
+# 12. Metal Bonds
+# 13. Overlapping Atoms (Second check of disordered atoms)
+# 14. Has Disorder (True/False)
+# 15. SMILES of the heaviest component
 
 import csv
 from ccdc import io
@@ -122,20 +122,15 @@ def filter_and_analyse(entry_id):
     if not molecule.is_3d:
         return None
     
-    # 2. Contain metals
-    if not any(element in entry.formula for element in elements):
-        return None
+    # # 2. Contain metals
+    # if not any(element in entry.formula for element in elements):
+    #     return None
     
     # 3. Are not polymeric
     if molecule.is_polymeric:
         return None
     
-    # 4. Have explicit hydrogens
-    explicit_hydrogens = any(atom.atomic_number == 1 for atom in molecule.atoms)
-    if not explicit_hydrogens:
-        return None
-    
-    # 5. Heavy component with SMILES
+    # 4. Heavy component with SMILES
     heavy_comp = molecule.heaviest_component
     if not heavy_comp.smiles:
         return None
@@ -157,27 +152,30 @@ def filter_and_analyse(entry_id):
     # 7. Organometallic (True/False)
     organometallic = 'True' if molecule.is_organometallic else 'False'
     
-    # 8. Hapticity (True if the molecule has at least a bond of type 9)
+    # 8. Explicicit Hydrogens (True/False)
+    explicit_hydrogens = all(atom.atomic_number == 1 and atom.coordinates is not None for atom in molecule.atoms if atom.atomic_number == 1)
+    
+    # 9. Hapticity (True if the molucule has at least a bond of type 9)
     hapticity = any(bond.bond_type == 9 for bond in molecule.bonds)
     
-    # 9. Number of atoms
+    # 10. Number of atoms
     n_atoms = len(molecule.atoms)
     
-    # 10/11. Connectivity (Complete/Partial/None) and Metal Bonds (True/False)
+    # 11/12. Connectivity (Complete/Partial/None) and Metal Bonds (True/False)
     connectivity, metal_bonds = check_connectivity(molecule)
     
-    # 12. Overlapping Atoms (Second check of disordered atoms)
+    # 13. Overlapping Atoms (Second check of disordered atoms)
     desc = descriptors.MolecularDescriptors()
     overlapping_atoms = any((d := desc.atom_distance(atom1, atom2)) is not None and d < 0.4 
                             for atom1 in molecule.atoms 
                             for atom2 in molecule.atoms if atom1 != atom2)   
     
-    # 13. Has Disorder (True/False)
+    # 14. Has Disorder (True/False)
     disorder = False
     if crystal.has_disorder:
         disorder = True
         
-    # 14. SMILES of the heaviest component
+    # 15. SMILES of the heaviest component
     smiles = heavy_comp.smiles
     
     
