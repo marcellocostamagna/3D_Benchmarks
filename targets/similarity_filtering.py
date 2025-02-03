@@ -1,3 +1,6 @@
+# Script to retreive all the identifiers of molecules that show a similarity score 
+# lower than a threshold to a given target molecule.
+
 import ccdc.io
 import pandas as pd
 from multiprocessing import Pool, cpu_count
@@ -23,23 +26,30 @@ def get_fingerprint(ccdcmol):
     # Generate the fingerprint
     return hsr.fingerprint.generate_fingerprint_from_data(atom_array)
 
+global_start_time = time.time() 
+
 # Load the dataframe of viable structures
 csv_file = f'./targets/viable_structures.csv'
-targets_file = f'./targets/targets.txt'
+# target_file = f'./targets/target.txt'
 
 # Load the dataframe
 df = pd.read_csv(csv_file)
+
+# Remove the entries with no explicit hydrogen atoms
+df = df[df['Explicit Hs'] == True]
+print(f'Number of entries with explicit Hs: {len(df)}')
+
 # For testing purposes get only the first n entries
-df = df.head(100)
+df = df.head(10000)
 
 # Load the target molecules
 # Get the fingerprints of the target molecules
-target_entries = []
-with open(targets_file, 'r') as f:
-    for line in f:
-        target_entries.append(line.strip())
-target_molecules = [ccdc.io.EntryReader('CSD').entry(e).molecule.heaviest_component for e in target_entries]
-target_fps = [get_fingerprint(m) for m in target_molecules]
+target_entry = 'AABHTZ'
+# with open(target_file, 'r') as f:
+#     for line in f:
+#         target_entry.append(line.strip())
+target_molecule = ccdc.io.EntryReader('CSD').entry(target_entry).molecule.heaviest_component
+target_fp = get_fingerprint(target_molecule)
 
 # Get the identifiers of the entries
 # Get the fingerprints of the entries
@@ -50,24 +60,23 @@ entry_fps = [get_fingerprint(m) for m in viable_molecules]
 # cretate a dictionary, entry: [molecule, fingerprint]
 entry_dict = dict(zip(entries, zip(viable_molecules, entry_fps)))
 
-# Calculate the similarity between the target molecules and the entries
+# Calculate the similarity between the target molecule and the entries
+print(f'Calculating the similarity scores of {len(entries)} entries...')
 mols_per_target = {}
-for i, target_fp in enumerate(target_fps):
-    mols_per_target[f'Target_{i}'] = []
-    for entry_fp, entry in zip(entry_fps, entries):
-        similarity = hsr.similarity.compute_similarity_score(target_fp, entry_fp)
-        if similarity < 0.4:
-            mols_per_target[f'Target_{i}'].append(entry)
+for entry_fp, entry in zip(entry_fps, entries):
+    similarity = hsr.similarity.compute_similarity_score(target_fp, entry_fp)
+    if similarity < 0.3:
+        mols_per_target[entry] = similarity
             
-# Collect the entries that have a similarity score lower than a threshold for all the targets (e.g., 0.3)
-# aka, select the entries that appear in all the lists, of each target, in mols_per_target dictionary
-final_mols = set.intersection(*map(set, mols_per_target.values()))
+final_mols = list(mols_per_target.keys())
 print(f'Number of final molecules: {len(final_mols)}')
 
 # Save the entries that have a similarity score lower than a threshold in a txt file
 with open('./targets/initial_population_test.txt', 'w') as f:
     for mol in final_mols:
         f.write(f'{mol}\n')
+        
+print(f'Time elapsed: {time.time() - global_start_time:.2f} seconds')
 
 
 

@@ -1,3 +1,6 @@
+# first script to test the feasibility of 
+# seraching pattern in the CSD
+
 import ccdc.search
 import time
 import random
@@ -24,7 +27,6 @@ def search(query, subset_identifiers):
     results = search.search(subset_identifiers)
     return results
     
-
 start = time.time()
 
 # SIMULATE A SEARCH OF A SUBSET OF THE CSD

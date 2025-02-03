@@ -3,7 +3,7 @@
 import ccdc.io
 
 csd_reader = ccdc.io.EntryReader('CSD')
-entry = csd_reader.entry('ABEYUC')
+entry = csd_reader.entry('ACUKAM')
 molecule = entry.molecule
 heavy_comp = molecule.heaviest_component
 
@@ -11,14 +11,12 @@ atoms = []
 for atom in heavy_comp.atoms:
     atoms.append(atom.atomic_symbol)
 
-bonds = {}
-for bond in heavy_comp.bonds:
-    # key: the couple of atomic symbols
-    key = f'{bond.atoms[0].atomic_symbol}-{bond.atoms[1].atomic_symbol}'
-    # value: the bond type
-    value = bond.bond_type
-    value = bond.is_cyclic
-    bonds[key] = value
+print(f'Number of atoms in the heaviest component: {len(atoms)}')
+# print MW
+print(f'Molecular weight: {heavy_comp.molecular_weight}')
 
-print(atoms)
-print(bonds)
+for component in molecule.components:
+    print(f'Number of atoms in the component: {len(component.atoms)}')
+    print(f'Molecular weight: {component.molecular_weight}')
+    for atom in component.atoms:
+        print(atom.atomic_symbol)
