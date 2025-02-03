@@ -30,6 +30,20 @@ Folder containing scripts to investigate the substructure capabilities of the CS
 
 Contains the work and the scripts used to define a procedure to assert the quality of a target choice. 
 
+### Current procedure
+
+```mermaid
+    graph TD
+    A[Representative patterns] --> B[Choice of targets]
+    D[Viable molecules] --> C
+    F --> B 
+    A --> F
+    B --> C[Similarity filtering]
+    C --> E[Potential population] 
+    E --> F[Pattern search]
+    F --> G[Initial population]
+```    
+    
 ## `visualization`
 
 Folder containing scripts for visualizing molecules and diagrams
