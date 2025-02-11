@@ -1,0 +1,19 @@
+name: cdc
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - rdkit
+  - openbabel
+  - oddt
+  - boost-cpp
+  - numpy
+  - sphinx
+  - sphinx_rtd_theme
+  - swig
+  - pymol-open-source
+  - pip
+  - pip:
+      - csd-python-api @ file:///Users/vagrant/builds/release/2024.1/release/build/distribution/wrapping/csd_python_api-3.1.0-py39-none-macosx_10_15_x86_64.whl#sha256=73a6ddc7c0243ba1bbc14460b73a787428e1ebf13aa1f2108437656d443f0502
+

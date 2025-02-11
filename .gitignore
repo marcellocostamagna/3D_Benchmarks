@@ -1,6 +1,11 @@
 cif/
 .DS_Store
 .vscode/
+*.csv
+*.txt
+*.sdf
+*.mol
+__pycache__/
 CSD_similarity/final_structures_with_fp.csv
 COD_similarity/final_structures_with_fp.csv
 CSD_similarity/entry_smiles_pybel.json

@@ -1,4 +1,4 @@
-# Script to retreive all the identifiers of molecules that show a similarity score 
+# Script to retrieve all the identifiers of molecules that show a similarity score 
 # lower than a threshold to a given target molecule.
 
 import ccdc.io
