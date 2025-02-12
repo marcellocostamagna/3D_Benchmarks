@@ -1,7 +1,6 @@
 cif/
 .DS_Store
 .vscode/
-*.csv
 *.txt
 *.sdf
 *.mol
