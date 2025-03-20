@@ -13,7 +13,7 @@ def get_array_from_ccdcmol(ccdcmol):
     atom_array = []
     for atom in ccdcmol.atoms:
         if atom.coordinates is not None:
-            atom_array.append([atom.coordinates[0], atom.coordinates[1], atom.coordinates[2], atom.atomic_number])    
+            atom_array.append([atom.coordinates[0], atom.coordinates[1], atom.coordinates[2], np.sqrt(atom.atomic_number)])    
     atom_array = np.array(atom_array)
     atom_array -= np.mean(atom_array, axis=0)  # Center the data
     return atom_array
