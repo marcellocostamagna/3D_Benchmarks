@@ -85,7 +85,7 @@ def plot_histogram(data, title):
     plt.show()
 
 def main():
-    filename = "stats.txt"
+    filename = "stats_0_5.txt"
     metals, geometries, populations = read_stats_file(filename)
     
     plot_histogram(metals, "Metals")
