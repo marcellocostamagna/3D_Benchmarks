@@ -112,7 +112,6 @@ def check_connectivity(molecule):
 def component_of_interest(molecule):
     """
     Returns the component of interest: The component that checks at least two of the following criteria:
-    
     1. Is organometallic
     2. Is the heaviest component
     3. Has the most atoms
@@ -134,7 +133,6 @@ def component_of_interest(molecule):
             "molecular_weight": molecular_weight,
             "atom_count": atom_count
         })
-    
     # Determine heaviest component and component with most atoms
     heaviest_component = max(properties, key=lambda x: x["molecular_weight"])
     most_atoms_component = max(properties, key=lambda x: x["atom_count"])
@@ -198,8 +196,8 @@ def filter_and_analyse(entry_id):
     # 1. Identifier
     id = entry.identifier
 
-    # 8. Explicicit Hydrogens (True/False)
-    explicit_hydrogens = all(atom.atomic_number == 1 and atom.coordinates is not None for atom in molecule.atoms if atom.atomic_number == 1)
+    # # 8. Explicicit Hydrogens (True/False)
+    # explicit_hydrogens = all(atom.atomic_number == 1 and atom.coordinates is not None for atom in molecule.atoms if atom.atomic_number == 1)
 
     # 10. Number of atoms of the component of interest
     n_atoms = len(comp_of_interest.atoms)
