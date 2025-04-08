@@ -5,11 +5,9 @@ import hsr
 import time
 import numpy as np
 import os
-from functools import partial
 
 # Function to generate an array from a molecule
-# EXTRA FEATURE: PROTONS
-def get_p_array_from_ccdcmol(ccdcmol):
+def get_array_from_ccdcmol(ccdcmol):
     atom_array = []
     for atom in ccdcmol.atoms:
         if atom.coordinates is not None:
@@ -18,22 +16,9 @@ def get_p_array_from_ccdcmol(ccdcmol):
     atom_array -= np.mean(atom_array, axis=0)  # Center the data
     return atom_array
 
-# EXTRA FEATURES: PROTONS & FORMAL CHARGES
-def get_p_q_array_from_ccdcmol(ccdcmol):
-    atom_array = []
-    for atom in ccdcmol.atoms:
-        if atom.coordinates is not None:
-            atom_array.append([atom.coordinates[0], atom.coordinates[1], atom.coordinates[2], np.sqrt(atom.atomic_number), atom.formal_charge])    
-    atom_array = np.array(atom_array)
-    atom_array -= np.mean(atom_array, axis=0)  # Center the data
-    return atom_array
-
 # Function to generate a fingerprint from a molecule
-def get_fingerprint(ccdcmol, with_charges=False):
-    if with_charges:
-        atom_array = get_p_q_array_from_ccdcmol(ccdcmol)
-    else:
-        atom_array = get_p_array_from_ccdcmol(ccdcmol)
+def get_fingerprint(ccdcmol):
+    atom_array = get_array_from_ccdcmol(ccdcmol)
     return hsr.fingerprint.generate_fingerprint_from_data(atom_array)
 
 # Function to determine the component of interest
@@ -72,23 +57,20 @@ def compute_fingerprint_parallel(entry):
     try:
         molecule = component_of_interest(entry_reader.entry(entry).molecule)
         if molecule:
-            return entry, get_fingerprint(molecule), get_fingerprint(molecule,with_charges=True), molecule.smiles
+            return entry, get_fingerprint(molecule), molecule.smiles
     except Exception as e:
         print(f"Error processing entry {entry}: {e}")
     return None  # Return None for failed cases
 
 # Function to compute similarity for a chunk of entries
-def process_chunk(chunk_args, charges=False):
+def process_chunk(chunk_args):
     target_fp, chunk_fingerprints = chunk_args
     results = {}
 
-    for entry, (entry_fp_p, entry_fp_p_q, smiles) in chunk_fingerprints.items():
+    for entry, (entry_fp, smiles) in chunk_fingerprints.items():
         try:
-            if charges:
-                similarity = hsr.similarity.compute_similarity_score(target_fp, entry_fp_p_q)
-            else:
-                similarity = hsr.similarity.compute_similarity_score(target_fp, entry_fp_p)
-            if similarity < 0.4:
+            similarity = hsr.similarity.compute_similarity_score(target_fp, entry_fp)
+            if similarity > 0.9 and similarity<=1:
                 results[entry] = (similarity, smiles)
         except Exception as e:
             print(f"Error processing entry {entry}: {e}")
@@ -97,7 +79,8 @@ def process_chunk(chunk_args, charges=False):
 
 if __name__ == "__main__":
     global_start_time = time.time()
-    output_dir = os.path.join(os.getcwd(), 'init_populations_protons_4')
+    # output_dir = os.path.join(os.getcwd(), 'init_population_protons_2')
+    output_dir = os.path.join(os.getcwd(), 'ABAYAF_test')
     os.makedirs(output_dir, exist_ok=True)
     
     # Load the dataframe of viable structures
@@ -107,29 +90,18 @@ if __name__ == "__main__":
 
     print(f"Starting parallel fingerprint precomputation for {len(entries)} structures...")
 
-    num_processes = 6 #cpu_count()  # Use all available CPUs
+    num_processes = cpu_count()  # Use all available CPUs
     with Pool(processes=num_processes) as pool:
         results = pool.map(compute_fingerprint_parallel, entries)
 
     # Filter out failed cases and convert to a dictionary
-    # fp1: proton fp
-    # fp2: proton and charges fp
-    precomputed_fingerprints = {entry: (fp1, fp2, smiles) for entry, fp1, fp2, smiles in results if entry is not None}
+    precomputed_fingerprints = {entry: (fp, smiles) for entry, fp, smiles in results if entry is not None}
 
     print(f"Precomputed fingerprints for {len(precomputed_fingerprints)} entries.")
 
     # Define target molecules
-    target_entries = ['ABAHIW', 'ABAKIZ', 'ABADOX',
-                      'ABABIP', 'GASQOK', 'ABEKIE',
-                      'NIWPUE01', 'ABEKIF', 'APUFEX',
-                      'ABEHAU', 'TITTUO', 'EGEYOG',
-                      'ABOBUP', 'XIDTOW', 'ACNCOB10',
-                      'TACXUQ','ACAZFE', 'NIVHEJ',
-                      'ADUPAS','DAJLAC', 'OFOWIS',
-                      'CATSUL','HESMUQ01', 'GUDQOL',
-                      'ABEVAG', 'AKOQOH', 'ADARUT',
-                      'AFECIA', 'ACOVUL', 'AFIXEV',
-                      'ABAYAF', 'RULJAM']
+
+    target_entries = ['ABAYAF']
 
     entry_reader = ccdc.io.EntryReader('CSD')
 
@@ -141,11 +113,8 @@ if __name__ == "__main__":
             if not target_molecule:
                 print(f"Skipping {target_entry}, no valid component found.")
                 continue
-            # For the last two target we use a different fingerprint (considering charges too)
-            if target_entry in ['ABAYAF', 'RULJAM']:
-                target_fp = get_fingerprint(target_molecule, with_charges=True)
-            else:
-                target_fp = get_fingerprint(target_molecule)
+            
+            target_fp = get_fingerprint(target_molecule)
         except Exception as e:
             print(f"Error processing target {target_entry}: {e}")
             continue
@@ -157,15 +126,10 @@ if __name__ == "__main__":
 
         print(f"Calculating similarity scores for {len(precomputed_fingerprints)} entries using {num_chunks} processes...")
         start_time = time.time()
-        if target_entry in ['ABAYAF', 'RULJAM']:
-            charges = True
-        else:
-            charges = False
-
-        chunk_args = [(target_fp, chunk) for chunk in fingerprint_chunks]
+        
         with Pool(processes=num_chunks) as pool:
-            func = partial(process_chunk, charges=charges)
-            results_list = pool.map(func, chunk_args)
+            chunk_args = [(target_fp, chunk) for chunk in fingerprint_chunks]
+            results_list = pool.map(process_chunk, chunk_args)
         
         mols_per_target = {}
         for partial_results in results_list:
