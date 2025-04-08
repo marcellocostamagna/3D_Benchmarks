@@ -334,11 +334,11 @@ def find_unique_fragments(fragments, similarity_matrix, threshold=0.9990):
 
 # Example Usage
 csd_reader = io.EntryReader('CSD')
-entry = csd_reader.entry('ACNCOB10')
+entry = csd_reader.entry('ABAHIW')
 molecule = component_of_interest(entry.molecule)
 
 # Save the original molecule as an image
-save_molecule_image(molecule, "original_molecule.png")
+# save_molecule_image(molecule, "original_molecule.png")
 
 
 # Print the original molecule
@@ -375,7 +375,7 @@ fragments = get_fragments(molecule)
 fragment_image_files = []
 for i, frag in enumerate(fragments):
     filename = f"fragment_{i+1}.png"
-    save_molecule_image(frag, filename)
+    # save_molecule_image(frag, filename)
     fragment_image_files.append(filename)
 
 # Fragment image files from already saved images
@@ -427,7 +427,7 @@ for i, frag in enumerate(unique_fragments):
 unique_fragments_image_files = []
 for i, frag in enumerate(unique_fragments):
     filename = f"unique_fragment_{i+1}.png"
-    save_molecule_image(frag, filename)
+    # save_molecule_image(frag, filename)
     unique_fragments_image_files.append(filename)
 
 # Save xml files of unique fragments
@@ -446,4 +446,4 @@ print(f"Unique Fragments: {num_unique_fragments}")
 
 
 # Visualize original molecule and unique fragments
-create_molecule_grid_matplotlib(["original_molecule.png"] + unique_fragments_image_files, "molecule_grid.png", columns=4)
+# create_molecule_grid_matplotlib(["original_molecule.png"] + unique_fragments_image_files, "molecule_grid.png", columns=4)

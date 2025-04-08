@@ -14,7 +14,7 @@ from hsr import similarity as sim
 
 # Ensure X11 for Qt compatibility
 os.environ["QT_QPA_PLATFORM"] = "xcb"
-matplotlib.use("TkAgg")  # Ensure interactive Matplotlib backend
+# matplotlib.use("TkAgg")  # Ensure interactive Matplotlib backend
 
 
 ### ------------------ Molecule Processing Functions ------------------ ###
@@ -172,11 +172,11 @@ def create_molecule_grid_matplotlib(image_filenames, output_filename, columns=4,
 
 # Load molecule and select the most relevant component
 csd_reader = io.EntryReader('CSD')
-entry = csd_reader.entry('ACOVUL')
+entry = csd_reader.entry('ABAHIW')
 molecule = component_of_interest(entry.molecule)
 
 # Save the original molecule as an image
-save_molecule_image(molecule, "original_molecule.png")
+# save_molecule_image(molecule, "original_molecule.png")
 print_molecule_atoms(molecule, title="Original Molecule")
 
 # Generate and save fragments
@@ -199,7 +199,7 @@ unique_fragments = [fragments[i] for i in unique_indices]
 unique_fragment_image_files = []
 for i, frag in enumerate(unique_fragments):
     filename = f"unique_fragment_{i+1}.png"
-    save_molecule_image(frag, filename)
+    # save_molecule_image(frag, filename)
     unique_fragment_image_files.append(filename)
     
 unique_fragment_image_files = []    
@@ -215,4 +215,4 @@ print(f"Total Fragments: {len(fragments)}")
 print(f"Unique Fragments: {len(unique_fragments)}")
 
 # Visualize original molecule and unique fragments
-create_molecule_grid_matplotlib(["original_molecule.png"] + unique_fragment_image_files, "molecule_grid.png", columns=4)
+# create_molecule_grid_matplotlib(["original_molecule.png"] + unique_fragment_image_files, "molecule_grid.png", columns=4)
