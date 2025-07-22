@@ -1,3 +1,0 @@
-ETEPIE: csd, pybel
-KNGLCO: csd
-YIGMOR: csd

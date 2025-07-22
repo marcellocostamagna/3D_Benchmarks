@@ -1,49 +1,48 @@
-# 3D Benchmarks
+# 3DOpt
 
-This repository contains the work in progress of building a benchmark for **3D de novo molecular design** for organic and inorganic molecules.
+**3DOpt** is the first benchmark for molecular de novo design to test generative methods for their ability to handle and optimize both organic and inorganic molecules in 3D. This benchmark is now part of the benchmarking framework [MolScore](https://github.com/MorganCThomas/MolScore).
 
-## `2D_representations`
+This repository contains the scripts, workflows, and analyses developed for 3DOpt, as well as supporting work presented in the associated article ([TODO: add reference]).  
+It includes workflows for filtering and preparing chemical data (`Filtering`, `Starting_populations`), scripts to test and compare such data (`CAEs`, `CAEs_analysis`, `Metal_targets_statistics`), tests on tools used for baseline methods (`Generators_analysis`), scripts to generate configuration files for MolScore (`3DOpt_configuration`), and scripts to aggregate and visualize baseline results (`Plot_3DOpt_results`).
 
-Folder containing scripts to investigate how to handle, retrieve, and compare SMILES of the CSD (Cambrdige Structural Database)
+## Set Up
+To run any script in the repo, first create and activate the provided conda environment:
 
-## `COD_similarity`
+```bash
+conda env create -f environment.yml
+conda activate 3DOpt_devel
+```
+*Note: Some scripts require a valid CCDC license*x
 
-Folder containing script to test how to work, and perform HSR (Hypershape Recognition) similarity comparisons, with the COD (Crystallographic Open Database)
+## Overview
+Each folder contains its own README describing the aim and usage of the scripts. Below is a brief overview:
 
-## `deprecated_code`
+- `Filtering`:  
+Scripts for selecting structures of interest from the Cambridge Structural Database (CSD).
 
-Folder to collect all scripts that have been deprecated
+- `Starting_populations`:  
+Scripts to generate and analyze starting populations after defining a set of targets.
 
-## `docking`
+- `CAEs`:  
+Scripts to generate and compare Connected Atom Environments (CAEs) for targets and candidate starting populations (to check if the starting set contains the building blocks needed to reconstruct targets). 
 
-Folder containing scripts used to investigate the possibility of introducing a docking test in the benchmark using a host-guest compound with inorganic molecules (e.g., Ferrocene in Cucurbituril)
+- `CAEs_analysis`:  
+Analysis scripts for CAE results to inform starting population selection.
 
-## `molecule_libraries`
+- `Metal_targets_statistics`:  
+Scripts for statistical analysis and visualization of metal types and geometry diversity among inorganic targets.
 
-Contains the work and the scripts used to define criteria and functions to filter a database (CSD and/or COD) to obtain "clean" molecules usable to genrate the targets and the initial populations of the benchmark's tests.
+- `Generators_analysis`: 
+Benchmarking of the three 3D structure generators used  (`CCDC`, `OBabel`, `RDKit`) for the chosen 3DOpt targets.
 
-## `substructure_search`
+- `3DOpt_configuration`:  
+Scripts to generate MolScore configuration files for 3DOpt, as well as 2D diagrams for the selected targets.
 
-Folder containing scripts to investigate the substructure capabilities of the CSD-Python-API
+- `Plot_3DOpt_results`:  
+Scripts to aggregate and plot results from 3DOpt runs using two baseline methods: `RandomSampler` and `ChemGE`. For further information, see [Molscore_baselines](https://github.com/MorganCThomas/MolScore_baselines).
 
-## `targets`
 
-Contains the work and the scripts used to define a procedure to assert the quality of a target choice. 
+## References 
+For more details and relevant citations, see the article (TODO: add reference), [MolScore](https://github.com/MorganCThomas/MolScore), its [publication](https://doi.org/10.1186/s13321-024-00861-w), and [MolScore_baselines](https://github.com/MorganCThomas/MolScore_baselines).
 
-### Current procedure
-
-```mermaid
-    graph TD
-    A[Representative patterns] --> B[Choice of targets]
-    D[Viable molecules] --> C
-    F --> B 
-    A --> F
-    B --> C[Similarity filtering]
-    C --> E[Potential population] 
-    E --> F[Pattern search]
-    F --> G[Initial population]
-```    
-    
-## `visualization`
-
-Folder containing scripts for visualizing molecules and diagrams
+For questions or issues, open an issue in this repo or contact the corresponding author.

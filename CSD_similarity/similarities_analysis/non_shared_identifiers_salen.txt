@@ -1,3 +1,0 @@
-ICECEY: csd, pybel
-YIGMOR: csd
-JOFMEA: csd
