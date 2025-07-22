@@ -1,0 +1,58 @@
+# Generators analysis
+
+This folder contains scripts and workflows for benchmarking 3D molecular structure generation using multiple generator methods. The workflow covers running individual or multiple benchmarks, aggregating results, and producing publication-quality figures.
+
+## Scripts
+
+- `run_single_generators.py`:  
+Runs a single benchmarking experiment for all specified targets and generator methods (CCDC, RDKit, OBabel) using a given random seed. Designed for use as a worker script called by the multi-run manager.
+**Usage:**  
+```bash
+python run_single_generators.py output_folder run_seed
+```  
+**Outputs:**  
+- `scores_and_times_<run_id>.csv`: Main per-target results (similarity, runtime, success/failure per method)
+- `success_summary.txt` and `success_summary.csv`: Tabular summary of per-target generator successes
+- Per-method SDF files in subfolders (optional, if code is configured to save them)  
+
+- `run_multiple_generators.py`:    
+Automates the execution of multiple independent runs using `run_single_generators.py` (with different random seeds), aggregates the results across runs, and produces summary CSVs and quick-look plots.  
+**Usage:**  
+```bash
+python run_multiple_generators.py
+```
+The number of runs (`N_RUNS`) and output folder (`BASE_OUT`) are set at the top of the script.
+
+**Outputs:**  
+- `run_1/`, `run_2/`, ... : Subfolders with results from each individual run
+
+- `success_rates_per_target.csv`: Success rates per target for each method, averaged over runs
+
+- `success_rates_per_run.csv`: Success rate summary for each individual run
+
+- `overall_success_rates.csv`: Total success rates per method across all runs
+
+- `average_scores_and_times.csv`: Per-target averages and standard deviations for similarity and runtime (per method)
+
+Quick-look SVG plots:
+
+- `average_similarities_scatter.svg`
+
+- `average_times_scatter.svg`
+
+- `plot_generators_results.py`:  
+Reads the aggregate CSVs produced by `run_multiple_generators.py` and generates high-quality SVG figures for publication or reports.
+**Usage:**
+```bash
+python plot_generators_results.py
+```
+The input data folder (`RESULTS_DIR`) and the output plots folder (`PLOT_OUT`) are set at the top of the script.
+**Outputs:**
+
+- `success_rate_grouped_bar.svg`: Grouped barplot of success rates by method and target
+
+- `similarity_scatter_grouped.svg`: Scatterplot of average similarity per method and target
+
+- `time_scatter_grouped.svg`: Scatterplot of average runtime per method and target
+
+- `stacked_generators_panel.svg`: Combined panel with all three metrics
