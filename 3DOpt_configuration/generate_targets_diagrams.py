@@ -32,7 +32,7 @@ TARGETS = [
 ]
 
 # Make sure the folder exists
-output_dir = "Targets_diagrams_test"
+output_dir = "Targets_diagrams"
 os.makedirs(output_dir, exist_ok=True)
 
 entry_reader = EntryReader('CSD')

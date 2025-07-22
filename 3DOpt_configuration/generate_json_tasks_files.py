@@ -14,7 +14,7 @@ if __name__ == "__main__":
                'AFECIA', 'ACOVUL', 'AFIXEV', 
                'ABAYAF', 'RULJAM' ]
     
-    output_dir = './targets/target_json_files/'
+    output_dir = '.target_json_files/'
     os.makedirs(output_dir, exist_ok=True)
     benchmark_name = '3DOpt'
     

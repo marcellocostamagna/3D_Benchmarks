@@ -9,4 +9,11 @@ Generates `.json` configuration files defining each taks associated with a targe
 - `generate_target_files.py`:  
 Generates the `.txt`files defining the reference (taget) molecules for each task. Each file contains the CSD entry code, the SMILES, and the appropriate HSR fingerprint of the chosen target.
 - `generate_targets_diagrams.py`:  
-For each target, extracts the relevant component and creates a 2D diagram (SVG) using CCDC tools for visualization and reporting.
+For each target, extracts the relevant component and creates a 2D diagram (SVG) using CCDC tools for visualization and reporting.  
+
+## Usage
+All scripts in this folder can be run directly with:  
+```bash
+python script.py
+```
+Replace `script.py` with the name of the script you want to run.
