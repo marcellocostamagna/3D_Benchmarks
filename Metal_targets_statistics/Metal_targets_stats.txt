@@ -1,0 +1,26 @@
+METALS
+Ruthenium (Ru): 4
+Platinum (Pt): 3
+Gold (Au): 1
+Copper (Cu): 3
+Cobalt (Co): 2
+Iron (Fe): 3
+Iridium (Ir): 3
+Chromium (Cr): 1
+Manganese (Mn): 1
+Zirconium (Zr): 1
+Lanthanum (La): 1
+Uranium (U): 1
+Europium (Eu): 1
+
+GEOMETRIES
+Octahedral: 4
+Tetrahedral: 9
+Trigonal_bipyramidal: 2
+Square_planar: 2
+Square_pyramidal: 2
+Trigonal_planar: 2
+Linear: 2
+Hepta-coordinated: 1
+Octa-coordinated: 1
+Nona-coordinated: 1
