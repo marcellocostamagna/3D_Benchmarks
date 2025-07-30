@@ -2,6 +2,28 @@
 
 This folder provides scripts for aggregating, analyzing, and visualizing the results of 3DOpt benchmarks using two classes of baseline methods: Random Sampler and ChemGE (evolutionary algorithm). The workflow assumes you have already collected results from multiple independent runs (typically 10) for each method/generator combination, organized in the folders below. The scripts produce easy-to-plot per-task averages and publication-quality SVG figures.
 
+## Obtaining Baselines Results
+
+The complete set of baseline results for the 3DOpt benchmark (all runs, methods, and generators) is available as compressed archives on [Zenodo](https://zenodo.org/records/16602642), DOI: 10.5281/zenodo.16602641.
+
+To download all results files directly to this folder, you can use `wget` as follows:
+
+```bash
+wget -P . -i zenodo_links.txt
+```
+
+Once the archives are downloaded, extract them with:
+
+```bash
+tar -xzf Results_ChemGE_CCDC.tar.gz
+tar -xzf Results_ChemGE_OBabel.tar.gz
+tar -xzf Results_ChemGE_RDKit.tar.gz
+tar -xzf Results_RndSam_CCDC_Entries.tar.gz
+tar -xzf Results_RndSam_CCDC_Smiles.tar.gz
+tar -xzf Results_RndSam_OBabel.tar.gz
+tar -xzf Results_RndSam_RDKit.tar.gz
+```
+
 ## Scripts
 
 ### `aggregate_3DOpt_results.py`  

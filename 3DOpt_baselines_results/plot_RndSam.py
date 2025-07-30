@@ -36,8 +36,7 @@ file_labels = [
 if len(sys.argv) > 1:
     file_labels = [(Path(f).stem, Path(f).stem.replace("_", " ")) for f in sys.argv[1:]]
 
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']  # colorblind-friendly
-
+colors = [ '#d62728', '#1f77b4', '#ff7f0e', '#2ca02c',]
 # ------------------------------------------------------------
 # 2) Load and align data
 # ------------------------------------------------------------
